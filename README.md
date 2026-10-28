@@ -18,4 +18,4 @@ Cilj projekta je poenostaviti organizacijo turnirjev in omogočiti upravljanje e
 
 Projektna dokumentacija je dostopna v mapi [docs](./docs/).
 
-Vključuje zasnovo rešitve, opis funkcionalnosti, podatkovni model, uporabniške zgodbe in wireframe zaslone.
+Vključuje zasnovo rešitve, opis funkcionalnosti, podatkovni model, uporabniške zgodbe in wireframe zaslone..

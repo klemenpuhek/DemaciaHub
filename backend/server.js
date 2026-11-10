@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const povezavaBaza = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const teamRoutes = require("./routes/teamRoutes");
 const session = require("express-session");
 
 const app = express();
@@ -33,6 +34,7 @@ app.get("/", (req,res)=>{
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/teams", teamRoutes);
 
 async function zagon(){
     try{

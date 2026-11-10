@@ -136,7 +136,7 @@ loginForm.addEventListener("submit", async (event) => {
 
         loginForm.reset();
 
-        // window.location.href = "home.html";
+        window.location.href = "home.html";
 
     } catch (error) {
         prikaziSporocilo(error.message, "error");

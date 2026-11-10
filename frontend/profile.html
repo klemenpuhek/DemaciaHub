@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DemaciaHub | Profile</title>
+
+        <link rel="stylesheet" href="./css/app.css" />
+        <script src="./js/app.js" defer></script>
+    </head>
+    <body data-page="profile">
+        <header class="navbar">
+            <nav class="nav-content" aria-label="Main navigation">
+                <a href="home.html" class="logo">
+                    <span class="logo-symbol">D</span>
+                    <span class="logo-text">DEMACIAHUB</span>
+                </a>
+
+                <div class="nav-links">
+                    <span class="nav-link">Tournaments</span>
+                    <span class="nav-link">Teams</span>
+                </div>
+
+                <div class="nav-right">
+                    <div class="search-box">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-4-4"></path>
+                        </svg>
+
+                        <input
+                            type="search"
+                            placeholder="Search tournaments..."
+                            aria-label="Search tournaments"
+                            disabled
+                        />
+                    </div>
+
+                    <a
+                        href="profile.html"
+                        class="profile-link active"
+                        aria-label="My profile"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="page-container profile-page">
+            <div class="page-heading">
+                <span class="eyebrow">SUMMONER INFORMATION</span>
+                <h1>MY PROFILE</h1>
+            </div>
+
+            <section class="content-card">
+                <h2>Account Information</h2>
+
+                <div class="info-row">
+                    <span>Username</span>
+                    <strong id="profile-username">Loading...</strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Email</span>
+                    <strong id="profile-email">Loading...</strong>
+                </div>
+            </section>
+
+            <section class="content-card">
+                <h2>My Team</h2>
+
+                <p id="team-loading" class="muted">
+                    Loading team information...
+                </p>
+
+                <div id="no-team" class="hidden">
+                    <p class="muted">
+                        You are not part of a team yet. Create your own team to
+                        start competing.
+                    </p>
+
+                    <button id="show-create-team" class="gold-button">
+                        CREATE TEAM
+                    </button>
+                </div>
+
+                <form id="create-team-form" class="team-form hidden">
+                    <div class="form-group">
+                        <label for="team-name">Team Name</label>
+                        <input
+                            type="text"
+                            id="team-name"
+                            placeholder="Enter your team name"
+                            maxlength="60"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="gold-button">
+                            CREATE TEAM
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cancel-create-team"
+                            class="secondary-button"
+                        >
+                            CANCEL
+                        </button>
+                    </div>
+                </form>
+
+                <div id="has-team" class="hidden">
+                    <div class="team-details">
+                        <h3 id="current-team-name"></h3>
+                        <p id="current-team-role" class="muted"></p>
+                    </div>
+
+                    <button
+                        id="leave-team-button"
+                        class="secondary-button hidden"
+                    >
+                        LEAVE TEAM
+                    </button>
+
+                    <div id="invite-section" class="invite-section hidden">
+                        <h3>Invite Player</h3>
+
+                        <form id="invite-form" class="invite-form">
+                            <div class="form-group">
+                                <input
+                                    type="text"
+                                    id="invite-username"
+                                    placeholder="Enter player's username"
+                                    autocomplete="off"
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" class="gold-button">
+                                SEND INVITE
+                            </button>
+                        </form>
+
+                        <p
+                            id="invite-message"
+                            class="form-message"
+                            role="status"
+                        ></p>
+                    </div>
+                </div>
+
+                <p id="team-message" class="form-message" role="status"></p>
+            </section>
+
+            <section class="content-card">
+                <h2>Team Invitations</h2>
+
+                <div id="invitations-list">
+                    <p class="muted">Loading invitations...</p>
+                </div>
+            </section>
+
+            <button id="logout-button" class="logout-button">LOG OUT</button>
+        </main>
+    </body>
+</html>

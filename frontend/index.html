@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DemaciaHub | Login</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/auth.js" defer></script>
+</head>
+<body>
+
+    <main class="auth-container">
+
+        <section class="welcome-section">
+            <div class="brand">
+                <div class="brand-symbol">D</div>
+                <span>DEMACIAHUB</span>
+            </div>
+
+            <div class="welcome-content">
+                <span class="eyebrow">WELCOME TO THE ARENA</span>
+
+                <h1>
+                    YOUR TEAM.<br>
+                    YOUR LEGACY.
+                </h1>
+
+                <div class="gold-line"></div>
+
+                <p>
+                    Create your team, compete in tournaments,
+                    and rise through the ranks.
+                    Your journey begins here.
+                </p>
+            </div>
+
+            <div class="welcome-footer">
+                BUILT FOR LEGENDS.
+            </div>
+        </section>
+
+        <section class="form-section">
+            <div class="auth-card">
+
+                <div class="card-heading">
+                    <h2 id="form-title">Welcome back</h2>
+                    <p id="form-subtitle">
+                        Sign in to continue your journey.
+                    </p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button type="button"
+                            class="tab active"
+                            id="login-tab">
+                        Login
+                    </button>
+
+                    <button type="button"
+                            class="tab"
+                            id="register-tab">
+                        Register
+                    </button>
+                </div>
+
+                <form id="login-form" class="auth-form">
+
+                    <div class="form-group">
+                        <label for="login-username">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="login-username"
+                            name="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="login-password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        SIGN IN
+                        <span>→</span>
+                    </button>
+                </form>
+
+                <form id="register-form"
+                      class="auth-form hidden">
+
+                    <div class="form-group">
+                        <label for="register-username">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="register-username"
+                            name="username"
+                            placeholder="Choose a username"
+                            minlength="3"
+                            maxlength="30"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-email">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            id="register-email"
+                            name="email"
+                            placeholder="Enter your email"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-password">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="register-password"
+                            name="password"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        CREATE ACCOUNT
+                        <span>→</span>
+                    </button>
+                </form>
+
+                <p id="form-message"
+                   class="form-message"
+                   role="status"
+                   aria-live="polite"></p>
+
+                <div class="card-footer">
+                    <span>FOR THE GLORY OF DEMACIA</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>

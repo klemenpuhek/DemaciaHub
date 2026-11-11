@@ -677,6 +677,40 @@ a {
 }
 
 
+.bracket-team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.match-win-button {
+    background: transparent;
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    color: var(--gold);
+    font-size: 10px;
+    padding: 5px 8px;
+}
+
+.match-win-button:hover {
+    background: var(--gold);
+    color: var(--navy);
+}
+
+.tournament-winner {
+    align-self: center;
+    min-width: 200px;
+    padding: 20px;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    color: var(--gold-light);
+    font-family: "Cinzel", serif;
+    font-weight: 700;
+    text-align: center;
+}
+
+
 /* RESPONSIVE */
 
 @media (max-width: 800px) {

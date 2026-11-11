@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:3000/api";
+const API_URL = "/api";
 
 const form = document.getElementById("tournament-form");
 const message = document.getElementById("tournament-message");

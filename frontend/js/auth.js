@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:3000/api/auth";
+const API_URL = "/api/auth";
 
 const loginTab = document.getElementById("login-tab");
 const registerTab = document.getElementById("register-tab");

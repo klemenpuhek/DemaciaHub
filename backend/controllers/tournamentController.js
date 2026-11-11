@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const Team = require("../models/Team");
 const Registration = require("../models/Registration");
-const Tournament = require("../models/Tournament")
+const Tournament = require("../models/Tournament");
 const mongoose = require("mongoose");
 
 async function ustvariTurnir(req, res) {
@@ -55,18 +55,17 @@ async function ustvariTurnir(req, res) {
 async function pridobiTurnirje(req, res) {
     try {
         const turnirji = await Tournament.find({
-            startDate: { $gt: new Date() }
-        }).sort({ startDate: 1 });
+            startDate: {$gt: new Date()},
+        }).sort({startDate: 1});
 
         return res.json(turnirji);
-
     } catch (error) {
-    console.error(error);
+        console.error(error);
 
-    return res.status(500).json({
-        sporocilo: error.message
-    });
-}
+        return res.status(500).json({
+            sporocilo: error.message,
+        });
+    }
 }
 
 
@@ -89,19 +88,29 @@ async function pridobiTurnir(req, res) {
         }
 
         const uporabnik = await User.findById(req.session.userId);
-        let prijavljen = false;
+
+        let prijavaStatus = null;
+        let jeKapetan = false;
 
         if (uporabnik && uporabnik.teamId) {
             const prijava = await Registration.findOne({
                 tournamentId: id,
-                teamId: uporabnik.teamId,
-                status: { $ne: "rejected" }
+                teamId: uporabnik.teamId
             });
 
-            prijavljen = prijava !== null;
+            const ekipa = await Team.findById(uporabnik.teamId);
+
+            prijavaStatus = prijava ? prijava.status : null;
+            jeKapetan = ekipa
+                ? String(ekipa.captainId) === String(uporabnik._id)
+                : false;
         }
 
-        return res.json({ turnir, prijavljen });
+        return res.json({
+            turnir,
+            prijavaStatus,
+            jeKapetan
+        });
 
     } catch (error) {
         return res.status(500).json({
@@ -112,6 +121,143 @@ async function pridobiTurnir(req, res) {
 
 
 async function prijaviEkipo(req, res) {
+    try {
+        const {id} = req.params;
+        const userId = req.session.userId;
+
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({
+                sporocilo: "Neveljaven ID turnirja.",
+            });
+        }
+
+        const turnir = await Tournament.findById(id);
+
+        if (!turnir) {
+            return res.status(404).json({
+                sporocilo: "Turnir ne obstaja.",
+            });
+        }
+
+        const zacetekPripravljanja = new Date(
+            turnir.startDate.getTime() - 2 * 60 * 60 * 1000,
+        );
+
+        if (
+            new Date() >= zacetekPripravljanja ||
+            turnir.status !== "upcoming"
+        ) {
+            return res.status(400).json({
+                sporocilo: "Prijave so zaprte 2 uri pred začetkom turnirja.",
+            });
+        }
+
+        const uporabnik = await User.findById(userId);
+
+        if (!uporabnik || !uporabnik.teamId) {
+            return res.status(400).json({
+                sporocilo: "Za prijavo morate biti član ekipe.",
+            });
+        }
+
+        const ekipa = await Team.findById(uporabnik.teamId);
+
+        if (!ekipa) {
+            return res.status(404).json({
+                sporocilo: "Ekipa ne obstaja.",
+            });
+        }
+
+        if (String(ekipa.captainId) !== String(userId)) {
+            return res.status(403).json({
+                sporocilo: "Samo kapetan lahko prijavi ekipo.",
+            });
+        }
+
+        const steviloClanov = await User.countDocuments({
+            teamId: ekipa._id,
+        });
+
+        if (steviloClanov !== 5) {
+            return res.status(400).json({
+                sporocilo: "Ekipa mora imeti natanko 5 igralcev.",
+            });
+        }
+
+        const obstojecaPrijava = await Registration.findOne({
+            tournamentId: id,
+            teamId: ekipa._id,
+        });
+
+        if (obstojecaPrijava) {
+            return res.status(409).json({
+                sporocilo: "Ekipa je že prijavljena na turnir.",
+            });
+        }
+
+        const steviloPrijav = await Registration.countDocuments({
+            tournamentId: id,
+            status: {$ne: "rejected"},
+        });
+
+        if (steviloPrijav >= turnir.maxTeams) {
+            return res.status(400).json({
+                sporocilo: "Turnir je že zapolnjen.",
+            });
+        }
+
+        const prijava = await Registration.create({
+            tournamentId: id,
+            teamId: ekipa._id,
+            status: "pending",
+        });
+
+        return res.status(201).json({
+            sporocilo: "Ekipa je bila uspešno prijavljena.",
+            prijava,
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({
+                sporocilo: "Ekipa je že prijavljena na turnir.",
+            });
+        }
+
+        return res.status(500).json({
+            sporocilo: "Napaka pri prijavi ekipe.",
+        });
+    }
+}
+
+async function pridobiPrijavljeneEkipe(req, res) {
+    try {
+        const {id} = req.params;
+
+        if (!mongoose.isValidObjectId(id)) {
+            return res.status(400).json({
+                sporocilo: "Neveljaven ID turnirja.",
+            });
+        }
+
+        const prijave = await Registration.find({
+            tournamentId: id,
+            status: {$ne: "rejected"},
+        }).populate("teamId", "name");
+
+        const ekipe = prijave
+            .filter((prijava) => prijava.teamId)
+            .map((prijava) => prijava.teamId);
+
+        return res.json(ekipe);
+    } catch (error) {
+        return res.status(500).json({
+            sporocilo: "Napaka pri pridobivanju ekip.",
+        });
+    }
+}
+
+
+async function potrdiPripravljenost(req, res) {
     try {
         const { id } = req.params;
         const userId = req.session.userId;
@@ -130,9 +276,17 @@ async function prijaviEkipo(req, res) {
             });
         }
 
-        if (turnir.startDate <= new Date() || turnir.status !== "upcoming") {
+        const zdaj = new Date();
+        const zacetek = turnir.startDate;
+        const lockInZacetek = new Date(
+            zacetek.getTime() - 2 * 60 * 60 * 1000
+        );
+
+        if (turnir.status !== "upcoming" ||
+            zdaj < lockInZacetek ||
+            zdaj >= zacetek) {
             return res.status(400).json({
-                sporocilo: "Prijave na turnir niso več mogoče."
+                sporocilo: "Lock-in je dovoljen samo zadnji 2 uri pred turnirjem."
             });
         }
 
@@ -140,21 +294,15 @@ async function prijaviEkipo(req, res) {
 
         if (!uporabnik || !uporabnik.teamId) {
             return res.status(400).json({
-                sporocilo: "Za prijavo morate biti član ekipe."
+                sporocilo: "Niste član ekipe."
             });
         }
 
         const ekipa = await Team.findById(uporabnik.teamId);
 
-        if (!ekipa) {
-            return res.status(404).json({
-                sporocilo: "Ekipa ne obstaja."
-            });
-        }
-
-        if (String(ekipa.captainId) !== String(userId)) {
+        if (!ekipa || String(ekipa.captainId) !== String(userId)) {
             return res.status(403).json({
-                sporocilo: "Samo kapetan lahko prijavi ekipo."
+                sporocilo: "Samo kapetan lahko potrdi pripravljenost ekipe."
             });
         }
 
@@ -168,80 +316,43 @@ async function prijaviEkipo(req, res) {
             });
         }
 
-        const obstojecaPrijava = await Registration.findOne({
-            tournamentId: id,
-            teamId: ekipa._id
-        });
+        const prijava = await Registration.findOneAndUpdate(
+            {
+                tournamentId: id,
+                teamId: ekipa._id,
+                status: "pending"
+            },
+            {
+                status: "confirmed",
+                confirmedAt: new Date()
+            },
+            { new: true }
+        );
 
-        if (obstojecaPrijava) {
+        if (!prijava) {
             return res.status(409).json({
-                sporocilo: "Ekipa je že prijavljena na turnir."
+                sporocilo: "Ekipa ni prijavljena ali je že potrdila sodelovanje."
             });
         }
 
-        const steviloPrijav = await Registration.countDocuments({
-            tournamentId: id,
-            status: { $ne: "rejected" }
-        });
-
-        if (steviloPrijav >= turnir.maxTeams) {
-            return res.status(400).json({
-                sporocilo: "Turnir je že zapolnjen."
-            });
-        }
-
-        const prijava = await Registration.create({
-            tournamentId: id,
-            teamId: ekipa._id,
-            status: "pending"
-        });
-
-        return res.status(201).json({
-            sporocilo: "Ekipa je bila uspešno prijavljena.",
+        return res.json({
+            sporocilo: "Ekipa je uspešno potrdila sodelovanje.",
             prijava
         });
 
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(409).json({
-                sporocilo: "Ekipa je že prijavljena na turnir."
-            });
-        }
-
         return res.status(500).json({
-            sporocilo: "Napaka pri prijavi ekipe."
+            sporocilo: "Napaka pri potrjevanju ekipe."
         });
     }
 }
 
 
-async function pridobiPrijavljeneEkipe(req, res) {
-    try {
-        const { id } = req.params;
-
-        if (!mongoose.isValidObjectId(id)) {
-            return res.status(400).json({
-                sporocilo: "Neveljaven ID turnirja."
-            });
-        }
-
-        const prijave = await Registration.find({
-            tournamentId: id,
-            status: { $ne: "rejected" }
-        }).populate("teamId", "name");
-
-        const ekipe = prijave
-            .filter(prijava => prijava.teamId)
-            .map(prijava => prijava.teamId);
-
-        return res.json(ekipe);
-
-    } catch (error) {
-        return res.status(500).json({
-            sporocilo: "Napaka pri pridobivanju ekip."
-        });
-    }
-}
-
-
-module.exports = {ustvariTurnir, pridobiTurnirje, pridobiTurnir, prijaviEkipo, pridobiPrijavljeneEkipe};
+module.exports = {
+    ustvariTurnir,
+    pridobiTurnirje,
+    pridobiTurnir,
+    prijaviEkipo,
+    pridobiPrijavljeneEkipe,
+    potrdiPripravljenost
+};

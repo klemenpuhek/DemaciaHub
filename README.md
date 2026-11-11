@@ -19,3 +19,44 @@ Cilj projekta je poenostaviti organizacijo turnirjev in omogočiti upravljanje e
 Projektna dokumentacija je dostopna v mapi [docs](./docs/).
 
 Vključuje zasnovo rešitve, opis funkcionalnosti, podatkovni model, uporabniške zgodbe in wireframe zaslone..
+
+## Zagon aplikacije
+
+### 1. Predpogoji
+- Node.js in npm
+- MongoDB Community Server
+- MongoDB Compass (za pregledovanje podatkov)
+
+### 2. Kloniranje repozitorija
+```bash
+git clone https://github.com/klemenpuhek/DemaciaHub.git
+cd DemaciaHub/backend
+```
+
+### 3. Namestitev odvisnosti
+```bash
+npm install
+```
+
+### 4. Konfiguracija okolja
+
+Zaženite lokalni MongoDB strežnik in v mapi `backend` ustvarite datoteko `.env`:
+
+```env
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/demaciahub
+SESSION_SECRET=poljuben-dolg-nakljucen-niz-znakov
+```
+
+MongoDB bo podatkovno bazo `demaciahub` ustvaril ob prvem zapisovanju podatkov.
+
+### 5. Zagon aplikacije
+```bash
+npm run dev
+```
+
+Aplikacijo odprite na naslovu:
+
+**http://localhost:3000**
+
+Frontend in backend se izvajata na istem strežniku.

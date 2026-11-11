@@ -1,19 +1,16 @@
 require("dotenv").config();
+
+const path = require("path");
 const express = require("express");
-const cors = require("cors");
+const session = require("express-session");
+
 const povezavaBaza = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const tournamentRoutes = require("./routes/tournamentRoutes");
-const session = require("express-session");
 
 const app = express();
-const PORT = process.env.PORT;
-
-app.use(cors({
-    origin: "http://127.0.0.1:5500",
-    credentials: true
-}));
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -28,26 +25,22 @@ app.use(session({
     }
 }));
 
-app.get("/", (req,res)=>{
-
-    res.json({sporocilo: "DemaciaHub api deluje"})
-
-});
-
 app.use("/api/auth", authRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/tournaments", tournamentRoutes);
 
-async function zagon(){
-    try{
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+async function zagon() {
+    try {
         await povezavaBaza();
 
-        app.listen(PORT, ()=>{
-            console.log(`streznik deluje na ${PORT}`)
+        app.listen(PORT, () => {
+            console.log(`Streznik deluje na http://localhost:${PORT}`);
         });
 
-    }catch(error){
-        console.log(`Zagon streznika ni uspel ${error.message}`);
+    } catch (error) {
+        console.log(`Zagon streznika ni uspel: ${error.message}`);
     }
 }
 

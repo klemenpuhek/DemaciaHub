@@ -1,11 +1,13 @@
 const API_URL = "http://127.0.0.1:3000/api";
 
+
 async function naloziTurnirje() {
-    const seznam = document.getElementById("tournaments-list");
+    const ongoing = document.getElementById("ongoing-tournaments");
+    const upcoming = document.getElementById("upcoming-tournaments");
 
     try {
         const odgovor = await fetch(API_URL + "/tournaments", {
-            credentials: "include",
+            credentials: "include"
         });
 
         const turnirji = await odgovor.json();
@@ -14,12 +16,8 @@ async function naloziTurnirje() {
             throw new Error(turnirji.sporocilo);
         }
 
-        seznam.replaceChildren();
-
-        if (turnirji.length === 0) {
-            seznam.textContent = "No upcoming tournaments available.";
-            return;
-        }
+        ongoing.replaceChildren();
+        upcoming.replaceChildren();
 
         for (const turnir of turnirji) {
             const kartica = document.createElement("a");
@@ -33,8 +31,8 @@ async function naloziTurnirje() {
             opis.textContent = turnir.description;
 
             const datum = document.createElement("p");
-            datum.textContent =
-                "Start: " + new Date(turnir.startDate).toLocaleString("en-GB");
+            datum.textContent = "Start: " +
+                new Date(turnir.startDate).toLocaleString("en-GB");
 
             const ekipe = document.createElement("p");
             ekipe.textContent = "Max teams: " + turnir.maxTeams;
@@ -44,11 +42,28 @@ async function naloziTurnirje() {
             kartica.appendChild(datum);
             kartica.appendChild(ekipe);
 
-            seznam.appendChild(kartica);
+            if (new Date(turnir.startDate) <= new Date()) {
+                ongoing.appendChild(kartica);
+            } else {
+                upcoming.appendChild(kartica);
+            }
         }
+
+        if (ongoing.children.length === 0) {
+            ongoing.textContent = "No ongoing tournaments.";
+        }
+
+        if (upcoming.children.length === 0) {
+            upcoming.textContent = "No upcoming tournaments.";
+        }
+
     } catch (error) {
-        seznam.textContent = error.message;
+        ongoing.textContent = error.message;
+        upcoming.textContent = error.message;
     }
 }
+
+naloziTurnirje();
+
 
 naloziTurnirje();

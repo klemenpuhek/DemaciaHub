@@ -533,7 +533,7 @@ a {
     margin-top: 30px;
 }
 
-#tournaments-list {
+.tournaments-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
@@ -620,6 +620,63 @@ a {
     border-radius: 4px;
     color: var(--gold-light);
 }
+
+
+#bracket-list {
+    display: flex;
+    gap: 45px;
+    overflow-x: auto;
+    padding: 20px 0 35px;
+}
+
+.bracket-round {
+    display: flex;
+    flex-direction: column;
+    min-width: 190px;
+    gap: 20px;
+}
+
+.bracket-round h3 {
+    font-family: "Cinzel", serif;
+    font-size: 16px;
+    color: var(--gold-light);
+    margin-bottom: 15px;
+}
+
+.bracket-match {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--navy);
+    overflow: hidden;
+}
+
+.bracket-team {
+    padding: 13px 15px;
+    min-height: 43px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.bracket-team + .bracket-team {
+    border-top: 1px solid var(--border);
+}
+
+.bracket-team.winner {
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
+.bracket-round:nth-child(2) {
+    justify-content: space-around;
+}
+
+.bracket-round:nth-child(3) {
+    justify-content: center;
+}
+
+
 /* RESPONSIVE */
 
 @media (max-width: 800px) {

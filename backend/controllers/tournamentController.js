@@ -55,25 +55,23 @@ async function ustvariTurnir(req, res) {
 
 async function pridobiTurnirje(req, res) {
     try {
-        const turnirji = await Tournament.find()
-            .sort({ startDate: 1 });
+        const turnirji = await Tournament.find().sort({startDate: 1});
 
         return res.json(turnirji);
-
     } catch (error) {
         return res.status(500).json({
-            sporocilo: "Napaka pri pridobivanju turnirjev."
+            sporocilo: "Napaka pri pridobivanju turnirjev.",
         });
     }
 }
 
 async function pridobiTurnir(req, res) {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({
-                sporocilo: "Neveljaven ID turnirja."
+                sporocilo: "Neveljaven ID turnirja.",
             });
         }
 
@@ -81,7 +79,7 @@ async function pridobiTurnir(req, res) {
 
         if (!turnir) {
             return res.status(404).json({
-                sporocilo: "Turnir ne obstaja."
+                sporocilo: "Turnir ne obstaja.",
             });
         }
 
@@ -93,7 +91,7 @@ async function pridobiTurnir(req, res) {
         if (uporabnik && uporabnik.teamId) {
             const prijava = await Registration.findOne({
                 tournamentId: id,
-                teamId: uporabnik.teamId
+                teamId: uporabnik.teamId,
             });
 
             const ekipa = await Team.findById(uporabnik.teamId);
@@ -104,15 +102,21 @@ async function pridobiTurnir(req, res) {
                 : false;
         }
 
+        const lahkoVnasaRezultate =
+            String(turnir.organizerId) === String(req.session.userId) ||
+            turnir.adminIds.some(
+                (adminId) => String(adminId) === String(req.session.userId),
+            );
+
         return res.json({
             turnir,
             prijavaStatus,
-            jeKapetan
+            jeKapetan,
+            lahkoVnasaRezultate
         });
-
     } catch (error) {
         return res.status(500).json({
-            sporocilo: "Napaka pri pridobivanju turnirja."
+            sporocilo: "Napaka pri pridobivanju turnirja.",
         });
     }
 }
@@ -255,12 +259,12 @@ async function pridobiPrijavljeneEkipe(req, res) {
 
 async function potrdiPripravljenost(req, res) {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
         const userId = req.session.userId;
 
         if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({
-                sporocilo: "Neveljaven ID turnirja."
+                sporocilo: "Neveljaven ID turnirja.",
             });
         }
 
@@ -268,21 +272,22 @@ async function potrdiPripravljenost(req, res) {
 
         if (!turnir) {
             return res.status(404).json({
-                sporocilo: "Turnir ne obstaja."
+                sporocilo: "Turnir ne obstaja.",
             });
         }
 
         const zdaj = new Date();
         const zacetek = turnir.startDate;
-        const lockInZacetek = new Date(
-            zacetek.getTime() - 2 * 60 * 60 * 1000
-        );
+        const lockInZacetek = new Date(zacetek.getTime() - 2 * 60 * 60 * 1000);
 
-        if (turnir.status !== "upcoming" ||
+        if (
+            turnir.status !== "upcoming" ||
             zdaj < lockInZacetek ||
-            zdaj >= zacetek) {
+            zdaj >= zacetek
+        ) {
             return res.status(400).json({
-                sporocilo: "Lock-in je dovoljen samo zadnji 2 uri pred turnirjem."
+                sporocilo:
+                    "Lock-in je dovoljen samo zadnji 2 uri pred turnirjem.",
             });
         }
 
@@ -290,7 +295,7 @@ async function potrdiPripravljenost(req, res) {
 
         if (!uporabnik || !uporabnik.teamId) {
             return res.status(400).json({
-                sporocilo: "Niste član ekipe."
+                sporocilo: "Niste član ekipe.",
             });
         }
 
@@ -298,17 +303,17 @@ async function potrdiPripravljenost(req, res) {
 
         if (!ekipa || String(ekipa.captainId) !== String(userId)) {
             return res.status(403).json({
-                sporocilo: "Samo kapetan lahko potrdi pripravljenost ekipe."
+                sporocilo: "Samo kapetan lahko potrdi pripravljenost ekipe.",
             });
         }
 
         const steviloClanov = await User.countDocuments({
-            teamId: ekipa._id
+            teamId: ekipa._id,
         });
 
         if (steviloClanov !== 5) {
             return res.status(400).json({
-                sporocilo: "Ekipa mora imeti natanko 5 igralcev."
+                sporocilo: "Ekipa mora imeti natanko 5 igralcev.",
             });
         }
 
@@ -316,40 +321,40 @@ async function potrdiPripravljenost(req, res) {
             {
                 tournamentId: id,
                 teamId: ekipa._id,
-                status: "pending"
+                status: "pending",
             },
             {
                 status: "confirmed",
-                confirmedAt: new Date()
+                confirmedAt: new Date(),
             },
-            { new: true }
+            {new: true},
         );
 
         if (!prijava) {
             return res.status(409).json({
-                sporocilo: "Ekipa ni prijavljena ali je že potrdila sodelovanje."
+                sporocilo:
+                    "Ekipa ni prijavljena ali je že potrdila sodelovanje.",
             });
         }
 
         return res.json({
             sporocilo: "Ekipa je uspešno potrdila sodelovanje.",
-            prijava
+            prijava,
         });
-
     } catch (error) {
         return res.status(500).json({
-            sporocilo: "Napaka pri potrjevanju ekipe."
+            sporocilo: "Napaka pri potrjevanju ekipe.",
         });
     }
 }
 
 async function pridobiBracket(req, res) {
     try {
-        const { id } = req.params;
+        const {id} = req.params;
 
         if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({
-                sporocilo: "Neveljaven ID turnirja."
+                sporocilo: "Neveljaven ID turnirja.",
             });
         }
 
@@ -357,12 +362,12 @@ async function pridobiBracket(req, res) {
 
         if (!turnir) {
             return res.status(404).json({
-                sporocilo: "Turnir ne obstaja."
+                sporocilo: "Turnir ne obstaja.",
             });
         }
 
-        let dvoboji = await Match.find({ tournamentId: id })
-            .sort({ round: 1, matchNumber: 1 })
+        let dvoboji = await Match.find({tournamentId: id})
+            .sort({round: 1, matchNumber: 1})
             .populate("team1Id", "name")
             .populate("team2Id", "name")
             .populate("winnerId", "name");
@@ -377,14 +382,14 @@ async function pridobiBracket(req, res) {
 
         const prijave = await Registration.find({
             tournamentId: id,
-            status: "confirmed"
+            status: "confirmed",
         });
 
-        const ekipe = prijave.map(prijava => prijava.teamId);
+        const ekipe = prijave.map((prijava) => prijava.teamId);
 
         if (ekipe.length < 2 || ekipe.length > 8) {
             return res.status(400).json({
-                sporocilo: "Za bracket potrebujete od 2 do 8 potrjenih ekip."
+                sporocilo: "Za bracket potrebujete od 2 do 8 potrjenih ekip.",
             });
         }
 
@@ -401,14 +406,14 @@ async function pridobiBracket(req, res) {
         const krogi = [];
 
         for (let krog = 1; krog <= steviloKrogov; krog++) {
-            const steviloDvobojev = velikost / (2 ** krog);
+            const steviloDvobojev = velikost / 2 ** krog;
             const dvobojiKroga = [];
 
             for (let i = 0; i < steviloDvobojev; i++) {
                 const dvoboj = new Match({
                     tournamentId: id,
                     round: krog,
-                    matchNumber: i + 1
+                    matchNumber: i + 1,
                 });
 
                 dvobojiKroga.push(dvoboj);
@@ -420,7 +425,8 @@ async function pridobiBracket(req, res) {
 
         for (let krog = 0; krog < krogi.length - 1; krog++) {
             for (let i = 0; i < krogi[krog].length; i++) {
-                krogi[krog][i].nextMatchId = krogi[krog + 1][Math.floor(i / 2)]._id;
+                krogi[krog][i].nextMatchId =
+                    krogi[krog + 1][Math.floor(i / 2)]._id;
                 krogi[krog][i].nextMatchSlot = (i % 2) + 1;
             }
         }
@@ -452,21 +458,148 @@ async function pridobiBracket(req, res) {
 
         await Match.insertMany(vsiDvoboji);
 
-        dvoboji = await Match.find({ tournamentId: id })
-            .sort({ round: 1, matchNumber: 1 })
+        dvoboji = await Match.find({tournamentId: id})
+            .sort({round: 1, matchNumber: 1})
             .populate("team1Id", "name")
             .populate("team2Id", "name")
             .populate("winnerId", "name");
 
         return res.json(dvoboji);
-
     } catch (error) {
         return res.status(500).json({
-            sporocilo: "Napaka pri generiranju bracketa."
+            sporocilo: "Napaka pri generiranju bracketa.",
         });
     }
 }
 
+async function vnesiRezultat(req, res) {
+    try {
+        const {id, matchId} = req.params;
+        const {winnerId} = req.body;
+        const userId = req.session.userId;
+
+        if (
+            !mongoose.isValidObjectId(id) ||
+            !mongoose.isValidObjectId(matchId) ||
+            !mongoose.isValidObjectId(winnerId)
+        ) {
+            return res.status(400).json({
+                sporocilo: "Neveljavni podatki.",
+            });
+        }
+
+        const turnir = await Tournament.findById(id);
+
+        if (!turnir) {
+            return res.status(404).json({
+                sporocilo: "Turnir ne obstaja.",
+            });
+        }
+
+        const jeOrganizator = String(turnir.organizerId) === String(userId);
+        const jeAdmin = turnir.adminIds.some(
+            (adminId) => String(adminId) === String(userId),
+        );
+
+        if (!jeOrganizator && !jeAdmin) {
+            return res.status(403).json({
+                sporocilo: "Samo administrator lahko vnese rezultat.",
+            });
+        }
+
+        if (new Date() < turnir.startDate) {
+            return res.status(400).json({
+                sporocilo: "Turnir se še ni začel.",
+            });
+        }
+
+        if (turnir.status === "completed") {
+            return res.status(400).json({
+                sporocilo: "Turnir je že zaključen.",
+            });
+        }
+
+        const dvoboj = await Match.findOne({
+            _id: matchId,
+            tournamentId: id,
+        });
+
+        if (!dvoboj) {
+            return res.status(404).json({
+                sporocilo: "Dvoboj ne obstaja.",
+            });
+        }
+
+        if (dvoboj.status === "completed") {
+            return res.status(409).json({
+                sporocilo: "Rezultat je že vnesen.",
+            });
+        }
+
+        if (!dvoboj.team1Id || !dvoboj.team2Id) {
+            return res.status(400).json({
+                sporocilo: "Obe ekipi še nista določeni.",
+            });
+        }
+
+        if (
+            String(dvoboj.team1Id) !== winnerId &&
+            String(dvoboj.team2Id) !== winnerId
+        ) {
+            return res.status(400).json({
+                sporocilo: "Zmagovalec mora biti ena od ekip v dvoboju.",
+            });
+        }
+
+        if (dvoboj.nextMatchId) {
+            const naslednji = await Match.findOne({
+                _id: dvoboj.nextMatchId,
+                tournamentId: id,
+            });
+
+            if (!naslednji) {
+                return res.status(404).json({
+                    sporocilo: "Naslednji dvoboj ne obstaja.",
+                });
+            }
+
+            const polje = dvoboj.nextMatchSlot === 1 ? "team1Id" : "team2Id";
+
+            if (dvoboj.nextMatchSlot !== 1 && dvoboj.nextMatchSlot !== 2) {
+                return res.status(400).json({
+                    sporocilo: "Neveljavna povezava med dvobojema.",
+                });
+            }
+
+            if (naslednji[polje]) {
+                return res.status(409).json({
+                    sporocilo: "Mesto v naslednjem dvoboju je že zasedeno.",
+                });
+            }
+
+            naslednji[polje] = winnerId;
+            await naslednji.save();
+        }
+
+        dvoboj.winnerId = winnerId;
+        dvoboj.status = "completed";
+        await dvoboj.save();
+
+        if (!dvoboj.nextMatchId) {
+            turnir.status = "completed";
+            await turnir.save();
+        }
+
+        return res.json({
+            sporocilo: "Rezultat je bil uspešno shranjen.",
+            dvoboj,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            sporocilo: "Napaka pri shranjevanju rezultata.",
+        });
+    }
+}
 
 module.exports = {
     ustvariTurnir,
@@ -475,5 +608,6 @@ module.exports = {
     prijaviEkipo,
     pridobiPrijavljeneEkipe,
     potrdiPripravljenost,
-    pridobiBracket
+    pridobiBracket,
+    vnesiRezultat
 };

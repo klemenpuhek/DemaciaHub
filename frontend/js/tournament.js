@@ -7,6 +7,7 @@ const signupMessage = document.getElementById("signup-message");
 let turnir = null;
 let prijavaStatus = null;
 let jeKapetan = false;
+let lahkoVnasaRezultate = false;
 
 async function naloziTurnir() {
     try {
@@ -23,6 +24,7 @@ async function naloziTurnir() {
         turnir = rezultat.turnir;
         prijavaStatus = rezultat.prijavaStatus;
         jeKapetan = rezultat.jeKapetan;
+        lahkoVnasaRezultate = rezultat.lahkoVnasaRezultate;
 
         document.getElementById("tournament-name").textContent = turnir.name;
         document.getElementById("overview-name").textContent = turnir.name;
@@ -41,6 +43,36 @@ async function naloziTurnir() {
         signupButton.disabled = true;
     }
 }
+
+
+async function shraniRezultat(matchId, winnerId) {
+    try {
+        const odgovor = await fetch(
+            API_URL + "/tournaments/" + tournamentId +
+            "/matches/" + matchId + "/result",
+            {
+                method: "PATCH",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ winnerId })
+            }
+        );
+
+        const rezultat = await odgovor.json();
+
+        if (!odgovor.ok) {
+            throw new Error(rezultat.sporocilo);
+        }
+
+        await naloziBracket();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
 
 function posodobiGumb() {
     if (!turnir) return;
@@ -179,13 +211,14 @@ function nastaviPrijavo() {
     });
 }
 
+
 async function naloziBracket() {
     const seznam = document.getElementById("bracket-list");
 
     try {
         const odgovor = await fetch(
             API_URL + "/tournaments/" + tournamentId + "/bracket",
-            {credentials: "include"},
+            { credentials: "include" }
         );
 
         const dvoboji = await odgovor.json();
@@ -197,12 +230,11 @@ async function naloziBracket() {
         seznam.replaceChildren();
 
         if (dvoboji.length === 0) {
-            seznam.textContent =
-                "Bracket will be available when the tournament starts.";
+            seznam.textContent = "Bracket will be available when the tournament starts.";
             return;
         }
 
-        const steviloKrogov = Math.max(...dvoboji.map((d) => d.round));
+        const steviloKrogov = Math.max(...dvoboji.map(d => d.round));
 
         for (let krog = 1; krog <= steviloKrogov; krog++) {
             const stolpec = document.createElement("div");
@@ -220,47 +252,77 @@ async function naloziBracket() {
 
             stolpec.appendChild(naslov);
 
-            const dvobojiKroga = dvoboji.filter((d) => d.round === krog);
+            const dvobojiKroga = dvoboji.filter(d => d.round === krog);
 
             for (const dvoboj of dvobojiKroga) {
                 const kartica = document.createElement("div");
                 kartica.className = "bracket-match";
 
-                const ekipa1 = document.createElement("div");
-                const ekipa2 = document.createElement("div");
+                const ekipi = [dvoboj.team1Id, dvoboj.team2Id];
 
-                ekipa1.className = "bracket-team";
-                ekipa2.className = "bracket-team";
+                for (const ekipa of ekipi) {
+                    const element = document.createElement("div");
+                    element.className = "bracket-team";
 
-                ekipa1.textContent = dvoboj.team1Id?.name || "TBD";
+                    const ime = document.createElement("span");
+                    ime.textContent = ekipa?.name || "TBD";
 
-                if (dvoboj.winnerId && !dvoboj.team2Id && krog === 1) {
-                    ekipa2.textContent = "BYE";
-                } else {
-                    ekipa2.textContent = dvoboj.team2Id?.name || "TBD";
-                }
-
-                if (dvoboj.winnerId) {
-                    if (dvoboj.winnerId._id === dvoboj.team1Id?._id) {
-                        ekipa1.classList.add("winner");
+                    if (!ekipa && dvoboj.winnerId && krog === 1) {
+                        ime.textContent = "BYE";
                     }
 
-                    if (dvoboj.winnerId._id === dvoboj.team2Id?._id) {
-                        ekipa2.classList.add("winner");
+                    element.appendChild(ime);
+
+                    if (ekipa &&
+                        String(dvoboj.winnerId?._id) === String(ekipa._id)) {
+                        element.classList.add("winner");
                     }
+
+                    if (lahkoVnasaRezultate &&
+                        dvoboj.status === "pending" &&
+                        dvoboj.team1Id &&
+                        dvoboj.team2Id &&
+                        ekipa) {
+
+                        const gumb = document.createElement("button");
+                        gumb.className = "match-win-button";
+                        gumb.textContent = "WIN";
+
+                        gumb.onclick = () => {
+                            gumb.disabled = true;
+                            shraniRezultat(dvoboj._id, ekipa._id);
+                        };
+
+                        element.appendChild(gumb);
+                    }
+
+                    kartica.appendChild(element);
                 }
 
-                kartica.appendChild(ekipa1);
-                kartica.appendChild(ekipa2);
                 stolpec.appendChild(kartica);
             }
 
             seznam.appendChild(stolpec);
         }
+
+        const finale = dvoboji.find(d =>
+            d.round === steviloKrogov
+        );
+
+        if (finale?.winnerId) {
+            const zmagovalec = document.createElement("div");
+            zmagovalec.className = "tournament-winner";
+            zmagovalec.textContent = "TOURNAMENT WINNER: " +
+                finale.winnerId.name;
+
+            seznam.appendChild(zmagovalec);
+        }
+
     } catch (error) {
         seznam.textContent = error.message;
     }
 }
+
 
 nastaviZavihke();
 nastaviPrijavo();

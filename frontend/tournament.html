@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DemaciaHub | Tournament</title>
+
+        <link rel="stylesheet" href="./css/app.css" />
+        <script src="./js/tournament.js" defer></script>
+    </head>
+    <body>
+        <header class="navbar">
+            <nav class="nav-content" aria-label="Main navigation">
+                <a href="home.html" class="logo">
+                    <span class="logo-symbol">D</span>
+                    <span class="logo-text">DEMACIAHUB</span>
+                </a>
+
+                <div class="nav-links">
+                    <a href="tournaments.html" class="nav-link active"
+                        >Tournaments</a
+                    >
+                    <span class="nav-link">Teams</span>
+                </div>
+
+                <div class="nav-right">
+                    <div class="search-box">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m20 20-4-4"></path>
+                        </svg>
+
+                        <input
+                            type="search"
+                            placeholder="Search tournaments..."
+                            aria-label="Search tournaments"
+                            disabled
+                        />
+                    </div>
+
+                    <a
+                        href="profile.html"
+                        class="profile-link"
+                        aria-label="My profile"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        >
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+                        </svg>
+                    </a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="page-container">
+            <div class="tournaments-heading">
+                <div class="page-heading">
+                    <span class="eyebrow">ENTER THE ARENA</span>
+                    <h1 id="tournament-name">Loading...</h1>
+                </div>
+
+                <button id="signup-button" class="gold-button">SIGN UP</button>
+            </div>
+
+            <p id="signup-message" class="form-message" role="status"></p>
+
+            <div class="tournament-tabs">
+                <button class="tournament-tab active" data-tab="overview">
+                    Overview
+                </button>
+
+                <button class="tournament-tab" data-tab="bracket">
+                    Bracket
+                </button>
+
+                <button class="tournament-tab" data-tab="teams">Teams</button>
+            </div>
+
+            <section id="overview" class="content-card tournament-panel">
+                <h2>Tournament Overview</h2>
+
+                <div class="info-row">
+                    <span>Tournament Name</span>
+                    <strong id="overview-name"></strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Start Date</span>
+                    <strong id="overview-date"></strong>
+                </div>
+
+                <div class="info-row">
+                    <span>Maximum Teams</span>
+                    <strong id="overview-teams"></strong>
+                </div>
+
+                <div class="tournament-info">
+                    <h3>Description</h3>
+                    <p id="overview-description"></p>
+                </div>
+
+                <div class="tournament-info">
+                    <h3>Rules</h3>
+                    <p id="overview-rules"></p>
+                </div>
+            </section>
+
+            <section id="bracket" class="content-card tournament-panel hidden">
+                <h2>Bracket</h2>
+            </section>
+
+            <section id="teams" class="content-card tournament-panel hidden">
+                <h2>Registered Teams</h2>
+
+                <div id="registered-teams">
+                    <p class="muted">Loading teams...</p>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>

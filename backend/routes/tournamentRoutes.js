@@ -7,7 +7,8 @@ const {
     pridobiTurnir,
     prijaviEkipo,
     pridobiPrijavljeneEkipe,
-    potrdiPripravljenost
+    potrdiPripravljenost,
+    pridobiBracket
 } = require("../controllers/tournamentController");
 
 const preveriAvtentikacijo = require("../middleware/authMiddleware");
@@ -18,5 +19,6 @@ router.get("/:id", preveriAvtentikacijo, pridobiTurnir);
 router.post("/:id/register", preveriAvtentikacijo, prijaviEkipo);
 router.get("/:id/teams", preveriAvtentikacijo, pridobiPrijavljeneEkipe);
 router.patch("/:id/lock-in", preveriAvtentikacijo, potrdiPripravljenost);
+router.get("/:id/bracket", preveriAvtentikacijo, pridobiBracket);
 
 module.exports = router;

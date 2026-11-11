@@ -1,4 +1,3 @@
-
 const API_URL = "http://127.0.0.1:3000/api";
 
 async function naloziTurnirje() {
@@ -6,7 +5,7 @@ async function naloziTurnirje() {
 
     try {
         const odgovor = await fetch(API_URL + "/tournaments", {
-            credentials: "include"
+            credentials: "include",
         });
 
         const turnirji = await odgovor.json();
@@ -23,8 +22,9 @@ async function naloziTurnirje() {
         }
 
         for (const turnir of turnirji) {
-            const kartica = document.createElement("div");
+            const kartica = document.createElement("a");
             kartica.className = "tournament-item";
+            kartica.href = "tournament.html?id=" + turnir._id;
 
             const ime = document.createElement("h3");
             ime.textContent = turnir.name;
@@ -33,8 +33,8 @@ async function naloziTurnirje() {
             opis.textContent = turnir.description;
 
             const datum = document.createElement("p");
-            datum.textContent = "Start: " +
-                new Date(turnir.startDate).toLocaleString("en-GB");
+            datum.textContent =
+                "Start: " + new Date(turnir.startDate).toLocaleString("en-GB");
 
             const ekipe = document.createElement("p");
             ekipe.textContent = "Max teams: " + turnir.maxTeams;
@@ -46,7 +46,6 @@ async function naloziTurnirje() {
 
             seznam.appendChild(kartica);
         }
-
     } catch (error) {
         seznam.textContent = error.message;
     }
